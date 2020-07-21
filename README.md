@@ -17,24 +17,30 @@ But should run fine in debian based linux.
 Role Variables
 --------------
 Available variables are listed below:
-
+```
 rancher_host: console.myrancher.com
+```
 Rancher URL API
-
+```
 rancher_clustername: mycluster
+```
 The name of cluster to be managed
-
+```
 rancher_user: myuser
+```
 Your access key (username). Can be created via Rancher UI, on you user avatar -> API & Keys
-
+```
 rancher_password: mypasswd
+```
 Your secret key (password). Can be created via Rancher UI, on you user avatar -> API & Keys
-
+```
 rancher_cluster_template_id: ctr-rfsx
+```
 The RKE cluster template created on Rancher. Can be accessed and modified on "Tools -> RKE Templates"
 Use here the ID of the template, retrieved by the "View in API" option.
-
+```
 rancher_cluster_roles='["controlplane","etcd","worker"]'
+```
 A list of roles for each node that will be used during the execution of add node command.
 This list can be described in inventory file.
 
@@ -42,7 +48,7 @@ Example Playbook
 ----------------
 
 This examples installs docker with the ericsysmin.docker.docker role.
-
+```
 - name: Manage Rancher Cluster
   hosts: all
   gather_facts: no
@@ -59,7 +65,7 @@ This examples installs docker with the ericsysmin.docker.docker role.
         docker_edition: ce
         docker_ee_version: 19.3.11
     - role: ansible-role-manage-rancher-cluster
-
+```
 License
 -------
 
