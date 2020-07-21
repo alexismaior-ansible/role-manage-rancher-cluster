@@ -1,6 +1,6 @@
 galaxy_info:
   author: Alexis Sotto Maior
-  description: IT Infrastructure Manager and Devops Engineer
+  description: Role to Manage a Rancher Cluster using RKE Templates
   company: Ministry of Economy of Brazil
 
   # If the issue tracker for your role is not on github, uncomment the
