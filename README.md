@@ -81,4 +81,4 @@ MIT / BSD
 Author Information
 ------------------
 
-This role was created in 2020 by Alexis Sotto Maior,
+This role was created in 2020 by Alexis Sotto Maior.
