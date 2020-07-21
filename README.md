@@ -17,32 +17,39 @@ But should run fine in debian based linux.
 Role Variables
 --------------
 Available variables are listed below:
+
+Rancher URL API
 ```
 rancher_host: console.myrancher.com
 ```
-Rancher URL API
+
+The name of cluster to be managed
 ```
 rancher_clustername: mycluster
 ```
-The name of cluster to be managed
+
+Your access key (username). Can be created via Rancher UI, on you user avatar -> API & Keys
 ```
 rancher_user: myuser
 ```
-Your access key (username). Can be created via Rancher UI, on you user avatar -> API & Keys
+
+Your secret key (password). Can be created via Rancher UI, on you user avatar -> API & Keys
 ```
 rancher_password: mypasswd
 ```
-Your secret key (password). Can be created via Rancher UI, on you user avatar -> API & Keys
-```
-rancher_cluster_template_id: ctr-rfsx
-```
+
 The RKE cluster template created on Rancher. Can be accessed and modified on "Tools -> RKE Templates"
 Use here the ID of the template, retrieved by the "View in API" option.
 ```
-rancher_cluster_roles='["controlplane","etcd","worker"]'
+rancher_cluster_template_id: ctr-rfsx
 ```
+
 A list of roles for each node that will be used during the execution of add node command.
 This list can be described in inventory file.
+```
+rancher_cluster_roles='["controlplane","etcd","worker"]'
+```
+
 
 Example Playbook
 ----------------
