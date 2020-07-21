@@ -10,7 +10,7 @@ The role requires that docker is already installed on target hosts.
 
 Supports the following Operating Systems:
 
-CentOS 7
+- CentOS 7
 
 But should run fine in debian based linux.
 
