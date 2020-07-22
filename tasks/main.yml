@@ -23,7 +23,7 @@
       password: "{{ rancher_password }}"
       method: POST
       body_format: json
-      body: { 'clusterTemplateRevisionId': 'cattle-global-data:{{ rancher_cluster_template_id }}', 'dockerRootDir': '/var/lib/docker', 'enableClusterAlerting': false, 'enableClusterMonitoring': false, 'name': '{{ rancher_clustername }}', 'windowsPreferedCluster': false }
+      body: { 'clusterTemplateRevisionId': 'cattle-global-data:{{ rancher_cluster_template_id }}', 'name': '{{ rancher_clustername }}' }
       validate_certs: no
       force_basic_auth: yes
       return_content: no
