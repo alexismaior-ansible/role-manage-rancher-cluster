@@ -3,7 +3,7 @@
     delegate_to: 127.0.0.1
     run_once: true
     uri:
-      url: http://{{ rancher_host }}/v3/clusters/?name={{ rancher_clustername }}
+      url: https://{{ rancher_host }}/v3/clusters/?name={{ rancher_clustername }}
       user: "{{ rancher_user }}"
       password: "{{ rancher_password }}"
       method: GET
@@ -47,13 +47,14 @@
       force_basic_auth: yes
       return_content: no
       status_code: 201
+    register: cluster_token
     when: query_rancher_response.json | json_query(jmesquery) != rancher_clustername
 
   - name: Get clusterID
     delegate_to: 127.0.0.1
     run_once: true
     uri:
-      url: http://{{ rancher_host }}/v3/clusters/?name={{ rancher_clustername }}
+      url: https://{{ rancher_host }}/v3/clusters/?name={{ rancher_clustername }}
       user: "{{ rancher_user }}"
       password: "{{ rancher_password }}"
       method: GET
@@ -62,7 +63,8 @@
       return_content: no
     register: cluster_info
 
-  - set_fact:
+  - name: define fact for clusterid
+    set_fact:
       clusterid: "{{ cluster_info.json | json_query('data[0].id') }}"
 
   - name: Get actual cluster nodes
@@ -78,10 +80,28 @@
       validate_certs: no
     register: cluster_nodes
 
-  - set_fact:
+  - name: define fact for already added_nodes list
+    set_fact:
       added_nodes: "{{ cluster_nodes.json |json_query(jmesquery)}}"
     vars:
       jmesquery: "data[?clusterId=='{{ clusterid }}'].nodeName"
+
+  - name: Get kubeconfig file
+    delegate_to: 127.0.0.1
+    run_once: true
+    uri:
+      url: https://{{ rancher_host }}/v3/clusters/{{ clusterid }}?action=generateKubeconfig
+      user: "{{ rancher_user }}"
+      password: "{{ rancher_password }}"
+      method: POST
+      validate_certs: no
+      force_basic_auth: yes
+      return_content: no
+    register: cluster_kubeconfig
+
+  - name: define fact for kubeconfig
+    set_fact:
+      kubeconfig: "{{ cluster_kubeconfig.json |json_query('config') }}"
 
   - name: Get Add Node command
     delegate_to: 127.0.0.1
@@ -96,8 +116,9 @@
       validate_certs: no
     register: rancher_command
 
-  # define a var with roles for the rancher add node command
-  - set_fact:
+
+  - name: define fact for command roles
+    set_fact:
       rancher_cluster_roles: "--{{ rancher_cluster_roles | join(' --') }}"
 
   - name: Add nodes on Rancher Cluster
