@@ -1,12 +1,15 @@
 Manage Rancher Cluster
 =========
 
-This Role manage a k8s cluster in a Rancher environment by using a RKE template already created.
+This Role creates a k8s cluster in a Rancher environment by using a RKE template that should be already created.
 
 Requirements
 ------------
 
 The role requires that docker is already installed on target hosts.
+It also requires a RKE template created on Rancher.
+Currently it just creates the cluster, but in the future it will support additional actions and input parameters.
+
 
 Supports the following Operating Systems:
 
@@ -48,6 +51,13 @@ A list of roles for each node that will be used during the execution of add node
 This list can be described in inventory file.
 ```
 rancher_cluster_roles='["controlplane","etcd","worker"]'
+```
+
+This role creates the following facts:
+```
+clusterid as string
+added_nodes as list
+kubeconfig as string
 ```
 
 
