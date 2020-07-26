@@ -50,6 +50,8 @@
     register: cluster_token
     when: query_rancher_response.json | json_query(jmesquery) != rancher_clustername
 
+
+
   - name: Get clusterID
     delegate_to: 127.0.0.1
     run_once: true
@@ -63,7 +65,7 @@
       return_content: no
     register: cluster_info
 
-  - name: define fact for clusterid
+  - name: create fact for clusterid
     set_fact:
       clusterid: "{{ cluster_info.json | json_query('data[0].id') }}"
 
@@ -80,7 +82,7 @@
       validate_certs: no
     register: cluster_nodes
 
-  - name: define fact for already added_nodes list
+  - name: create fact for already added_nodes list
     set_fact:
       added_nodes: "{{ cluster_nodes.json |json_query(jmesquery)}}"
     vars:
@@ -99,7 +101,7 @@
       return_content: no
     register: cluster_kubeconfig
 
-  - name: define fact for kubeconfig
+  - name: create fact for kubeconfig
     set_fact:
       kubeconfig: "{{ cluster_kubeconfig.json |json_query('config') }}"
 
@@ -117,7 +119,7 @@
     register: rancher_command
 
 
-  - name: define fact for command roles
+  - name: define command roles var
     set_fact:
       rancher_cluster_roles: "--{{ rancher_cluster_roles | join(' --') }}"
 
@@ -126,3 +128,19 @@
       jmesquery: "data[?clusterId=='{{ clusterid }}'].nodeCommand"
     shell: "{{ rancher_command.json | json_query(jmesquery) |first}} {{ rancher_cluster_roles }} "
     when: inventory_hostname not in added_nodes
+
+  - name: Wait for cluster to come up
+    delegate_to: 127.0.0.1
+    run_once: true
+    uri:
+      url: "https://{{ rancher_host }}/v3/clusters/{{ clusterid }}"
+      user: "{{ rancher_user }}"
+      password: "{{ rancher_password }}"
+      force_basic_auth: yes
+      status_code: 200
+      method: GET
+      validate_certs: no
+    register: result
+    until: result.json.state.find("active") != -1
+    retries: 100
+    delay: 10
