@@ -1,7 +1,9 @@
 Manage Rancher Cluster
 =========
 
-This Role creates a k8s cluster in a Rancher environment by using a RKE template that should be already created.
+This Role creates/deletes a k8s cluster in a Rancher environment by using a RKE template that should be already created.
+
+When the deletion is triggered, this role remove the cluster from Rancher console and clean all docker images and folders from the nodes.
 
 Requirements
 ------------
@@ -29,6 +31,11 @@ rancher_host: console.myrancher.com
 The name of cluster to be managed
 ```
 rancher_clustername: mycluster
+```
+
+The state of the cluster
+```
+rancher_cluster_state: present/absent
 ```
 
 Your access key (username). Can be created via Rancher UI, on you user avatar -> API & Keys
@@ -66,12 +73,13 @@ Example Playbook
 
 This examples installs docker with the ericsysmin.docker.docker role.
 ```
-- name: Manage Rancher Cluster
+- name: Create Rancher Cluster
   hosts: all
   gather_facts: no
   vars:
     rancher_host: console.rancher.domain.com
     rancher_clustername: mycluster
+    rancher_cluster_state: present
     rancher_user: token-bla
     rancher_password: blablablablablablablalbla
     rancher_cluster_template_id: ctr-rfsx6    
@@ -81,8 +89,25 @@ This examples installs docker with the ericsysmin.docker.docker role.
         docker_storage_driver: overlay2
         docker_edition: ce
         docker_ee_version: 19.3.11
-    - role: ansible-role-manage-rancher-cluster
+    - role: alexismaior.ansible_role_manage_rancher_cluster
 ```
+
+This examples deletes a Rancher k8s cluster and fully lean its nodes.
+```
+- name: Delete Rancher Cluster
+  hosts: all
+  gather_facts: no
+  vars:
+    rancher_host: console.rancher.domain.com
+    rancher_clustername: mycluster
+    rancher_cluster_state: absent
+    rancher_user: token-bla
+    rancher_password: blablablablablablablalbla
+    rancher_cluster_template_id: ctr-rfsx6    
+  roles:
+    - role: alexismaior.ansible_role_manage_rancher_cluster
+```
+
 License
 -------
 

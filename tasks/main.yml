@@ -29,7 +29,7 @@
       return_content: no
       status_code: 201
     register: rancher_cluster
-    when: query_rancher_response.json | json_query(jmesquery) != rancher_clustername
+    when: (query_rancher_response.json | json_query(jmesquery) != rancher_clustername and rancher_cluster_state == "present")
 
   - name: Create cluster token
     delegate_to: 127.0.0.1
@@ -48,9 +48,7 @@
       return_content: no
       status_code: 201
     register: cluster_token
-    when: query_rancher_response.json | json_query(jmesquery) != rancher_clustername
-
-
+    when: (query_rancher_response.json | json_query(jmesquery) != rancher_clustername and rancher_cluster_state == "present")
 
   - name: Get clusterID
     delegate_to: 127.0.0.1
@@ -117,17 +115,18 @@
       return_content: yes
       validate_certs: no
     register: rancher_command
-
+    when: rancher_cluster_state == "present"
 
   - name: define command roles var
     set_fact:
       rancher_cluster_roles: "--{{ rancher_cluster_roles | join(' --') }}"
+    when: rancher_cluster_state == "present"
 
   - name: Add nodes on Rancher Cluster
     vars:
       jmesquery: "data[?clusterId=='{{ clusterid }}'].nodeCommand"
     shell: "{{ rancher_command.json | json_query(jmesquery) |first}} {{ rancher_cluster_roles }} "
-    when: inventory_hostname not in added_nodes
+    when: (inventory_hostname|upper not in added_nodes|upper and rancher_cluster_state == "present")
 
   - name: Wait for cluster to come up
     delegate_to: 127.0.0.1
@@ -144,3 +143,32 @@
     until: result.json.state.find("active") != -1
     retries: 100
     delay: 10
+    when: (rancher_cluster_state == 'present')
+
+  - name: Delete Cluster
+    delegate_to: 127.0.0.1
+    run_once: true
+    vars:
+      jmesquery: "data[0].name"
+    uri:
+      url: https://{{ rancher_host }}/v3/clusters/{{ clusterid }}
+      user: "{{ rancher_user }}"
+      password: "{{ rancher_password }}"
+      method: DELETE
+      force_basic_auth: yes
+      return_content: yes
+      validate_certs: no
+    register: rancher_command
+    when: (query_rancher_response.json | json_query(jmesquery) == rancher_clustername and rancher_cluster_state == "absent")
+
+  - name: Clean nodes after deletion
+    vars:
+      jmesquery: "data[0].name"
+    script: files/clean-up.sh
+    when: (query_rancher_response.json | json_query(jmesquery) == rancher_clustername and rancher_cluster_state == "absent")
+
+  - name: Reboot nodes after clean-up
+    vars:
+      jmesquery: "data[0].name"
+    reboot:
+    when: (query_rancher_response.json | json_query(jmesquery) == rancher_clustername and rancher_cluster_state == "absent")
